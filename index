@@ -1,0 +1,516 @@
+<!DOCTYPE HTML5> 
+<html>
+<head>
+<title>Project PC</title>
+<link rel="stylesheet" href="styles.css" type="text/css" media="screen" />
+<link rel="icon" type="image/png" href="image/logo.png"/>
+</head>
+<body>
+	<center>
+	<div id='header'>
+		<h1>Project PC</h1>
+	</div>
+	<div id='content'>
+	<table>
+	<tr>
+	<td width='33%' align='right'>
+	<div id='edhead'>
+		<h2>&nbsp;Edge Detection</h2>
+	</div>
+	<table align='right'>
+	<tr>
+	<td>
+	<button id='laplacian' class='edge'>Laplacian</button>
+	</td>
+	<td>
+	<button id='sobel' class='edge'>Sobel</button>
+	</td>
+	</tr>
+	<tr>
+	<td>
+	<button id='prewitt' class='edge'>Prewitt</button>
+	</td>
+	<td>
+	<button id='roberts' class='edge'>Roberts</button>
+	</td>
+	</tr>
+	</table>
+	</td>
+	<td>
+	</td>
+	<td>
+	</td>
+	<td width='33%'>
+    <div class='fileUpload'>
+    <span>&nbsp;Browse...</span>
+    <input type='file' class='file' id='file'/>
+	</div>
+	<canvas id='canvas' width='300' height='300'></canvas>
+	<canvas id='hefe' class='filter'></canvas>
+	<canvas id='hudson' class='filter'></canvas>
+	<canvas id='toaster' class='filter'></canvas>
+	<canvas id='willow' class='filter'></canvas>
+	</td>
+	<td>
+	</td>
+	<td>
+	</td>
+	<td width='33%'>
+	<div id='fhead'>
+		<h2>&nbsp;Filter</h2>
+	</div>
+	<table align='left'>
+	<tr>
+	<td>
+	<button id='bhefe' class='fhefe'>Hefe</button>
+	</td>
+	<td>
+	<button id='bhudson' class='fhudson'>Hudson</button>
+	</td>
+	</tr>
+	<tr>
+	<td>
+	<button id='btoaster' class='ftoaster'>Toaster</button>
+	</td>
+	<td>
+	<button id='bwillow' class='fwillow'>Willow</button>
+	</td>
+	</tr>
+	</table>
+	</td>
+	</tr>
+	</table>
+	</div>
+	<br>
+	<div id='menuFilter'>
+	<button id='normal' class='effect'>Normal</button>
+	<button id='negative' class='effect'>Negative</button>
+	<button id='grayscale' class='effect'>Grayscale</button>
+	<button id='sepia' class='effect'>Sepia</button>
+	<button id='hsi' class='effect'>HSI</button>
+	<button id='solarize' class='effect'>Solarize</button>
+	<button id='posterize' class='effect'>Posterize</button>
+	</div>
+	</center>
+</body>
+<script src='pc.js'></script>
+<script>
+	var obj = new pc(canvas)
+	var read = false;
+	var effect = false;
+	var img = new Array()
+	var flt = new Array()
+	
+	var hefe = document.getElementById('hefe')
+	var hudson = document.getElementById('hudson')
+	var toster = document.getElementById('toaster')
+	var willow = document.getElementById('willow')
+	var fhefe = new pc(hefe)
+	var fhudson = new pc(hudson)
+	var ftoaster = new pc(toaster)
+	var fwillow = new pc(willow)
+	fhefe.image2canvas("image/filter/hefe.jpg")
+	fhudson.image2canvas("image/filter/hudson.jpg")
+	ftoaster.image2canvas("image/filter/toaster.jpg")
+	fwillow.image2canvas("image/filter/willow.jpg")
+
+	window.onload = function(){
+		var input = document.getElementById('file')
+		input.addEventListener('change', handleFiles)
+	}		
+
+	function handleFiles(e){
+		var url = URL.createObjectURL(e.target.files[0])
+		var canvas = document.getElementById('canvas')
+		obj.image2canvas(url)
+	}
+	
+	<!----------------------------------------------------------------------EFFECT---------------------------------------------------------------------------->
+	document.getElementById('normal').addEventListener('click',function(){
+		obj.image2original()
+	})
+	
+	document.getElementById('negative').addEventListener('click',function(){
+		if (!read){
+			img = obj.image2read()
+			read = true
+		}
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+
+		for(var i=0; i<img.length; i++){
+			imgtemp[i][0] = 255 - img[i][0]
+			imgtemp[i][1] = 255 - img[i][1]
+			imgtemp[i][2] = 255 - img[i][2]
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = true;
+	})
+	
+	document.getElementById('grayscale').addEventListener('click',function(){
+		if (!read){
+			img = obj.image2read()
+			read = true
+		}
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+
+		for(var i=0; i<img.length; i++){
+			var total = Math.floor((img[i][0] + img[i][1] + img[i][2]) / 3)
+			imgtemp[i][0] = total
+			imgtemp[i][1] = total
+			imgtemp[i][2] = total
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = true;
+	})
+	
+	document.getElementById('sepia').addEventListener('click',function(){
+		if (!read){
+			img = obj.image2read()
+			read = true
+		}
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+
+		for(var i=0; i<img.length; i++){
+			imgtemp[i][0] = (img[i][0] * .393 + img[i][1] * .769 + img[i][2] * .189)
+			imgtemp[i][1] = (img[i][0] * .349 + img[i][1] * .686 + img[i][2] * .168)
+			imgtemp[i][2] = (img[i][0] * .2723 + img[i][1] * .534 + img[i][2] * .131)
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = true;
+	})
+	
+	document.getElementById('hsi').addEventListener('click',function(){
+		if (!read){
+			img = obj.image2read()
+			read = true
+		}
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+
+		for(var i=0; i<img.length; i++){
+			var R = imgtemp[i][0] / 255
+			var G = imgtemp[i][1] / 255
+			var B = imgtemp[i][2] / 255
+			var numi = ((R - G) + (R - B)) / 2
+			var denom = (Math.pow((R - G), 2) + ((R - B) * Math.pow((G - B), 1/2)))
+			var H = Math.acos(numi / denom)
+			if (B > G){
+				H = 360 - H
+			}
+			H = H / 360
+			var S = 1 - ( 3 / (R + G + B)) * Math.min(R, G, B)
+			var I = (R + G + B) / 3
+			imgtemp[i][0] = H * 255
+			imgtemp[i][1] = S * 255
+			imgtemp[i][2] = I * 255
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = true;
+	})
+	
+	document.getElementById('solarize').addEventListener('click',function(){
+		if (!read){
+			img = obj.image2read()
+			read = true
+		}
+		var R = 52
+		var G = 68
+		var B = 52
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+		
+		for(var i=0; i<img.length; i++){
+			if (imgtemp[i][0] < R)
+				imgtemp[i][0] = 255 - img[i][0]
+			if (imgtemp[i][1] < G)
+				imgtemp[i][1] = 255 - img[i][1]
+			if (imgtemp[i][2] < B)
+				imgtemp[i][2] = 255 - img[i][2]
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = true;
+	})
+	
+	document.getElementById('posterize').addEventListener('click',function(){
+		if (!read){
+			img = obj.image2read()
+			read = true
+		}
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+		
+		for(var i=0; i<img.length; i++){
+			var R = Math.floor(imgtemp[i][0] / 64) * 85
+			var G = Math.floor(imgtemp[i][1] / 64) * 85
+			var B = Math.floor(imgtemp[i][2] / 64) * 85
+			imgtemp[i][0] = R
+			imgtemp[i][1] = G
+			imgtemp[i][2] = B
+			imgtemp[i][3] = img[i][3]
+		}
+		obj.array2canvas(imgtemp)
+		effect = true;
+	})
+	<!----------------------------------------------------------------------FILTER---------------------------------------------------------------------------->
+	document.getElementById('bhefe').addEventListener('click',function(){
+		if (!read || effect){
+			img = obj.image2read()
+			read = true
+		}
+		flt = fhefe.filter2read(obj.width, obj.height)
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+		
+		for(var i=0; i<img.length; i++){
+			imgtemp[i][0] = flt[i][0] / 2 + img[i][0]
+			imgtemp[i][1] = flt[i][1] / 2 + img[i][1]
+			imgtemp[i][2] = flt[i][2] / 2 + img[i][2]
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = false;
+	})
+	
+	document.getElementById('bhudson').addEventListener('click',function(){
+		if (!read || effect){
+			img = obj.image2read()
+			read = true
+		}
+		flt = fhudson.filter2read(obj.width, obj.height)
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+		
+		for(var i=0; i<img.length; i++){
+			imgtemp[i][0] = flt[i][0] / 2 + img[i][0]
+			imgtemp[i][1] = flt[i][1] / 2 + img[i][1]
+			imgtemp[i][2] = flt[i][2] / 2 + img[i][2]
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = false;
+	})
+	
+	document.getElementById('btoaster').addEventListener('click',function(){
+		if (!read || effect){
+			img = obj.image2read()
+			read = true
+		}
+		flt = ftoaster.filter2read(obj.width, obj.height)
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+		
+		for(var i=0; i<img.length; i++){
+			imgtemp[i][0] = flt[i][0] / 2 + img[i][0]
+			imgtemp[i][1] = flt[i][1] / 2 + img[i][1]
+			imgtemp[i][2] = flt[i][2] / 2 + img[i][2]
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = false;
+	})
+	
+	document.getElementById('bwillow').addEventListener('click',function(){
+		if (!read || effect){
+			img = obj.image2read()
+			read = true
+		}
+		flt = fwillow.filter2read(obj.width, obj.height)
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+		
+		for(var i=0; i<img.length; i++){
+			imgtemp[i][0] = flt[i][0] / 2 + img[i][0]
+			imgtemp[i][1] = flt[i][1] / 2 + img[i][1]
+			imgtemp[i][2] = flt[i][2] / 2 + img[i][2]
+			imgtemp[i][3] = img[i][3] 
+		}
+		obj.array2canvas(imgtemp)
+		effect = false;
+	})
+	<!--------------------------------------------------------------EDGE DETECTION---------------------------------------------------------------------------->
+	document.getElementById('laplacian').addEventListener('click',function(){
+		if (!read || effect){
+			img = obj.image2read()
+			read = true
+		}
+		imgtemp = new Array()
+		for(var c=0; c<img.length; c++){
+			temp = new Array()
+			for(var d=0; d<4; d++){
+				temp.push(img[c][d])
+			}
+			imgtemp.push(temp)
+		}
+
+		var xpos = 0;
+		var ypos = 0;
+		function cek(x,y,n){
+			if(y>=0 && x>=0 && x<obj.width && y<obj.height) return parseInt(imgtemp[obj.xy2i(x,y)])
+			else return 0
+		}
+		for(var i=0; i<img.length; i++){
+			var Gtemp = new Array(4)
+			xpos = obj.i2x(i)
+			ypos = obj.i2y(i)
+			for(var j=0; j<3; j++){
+				img[i][j] = (cek(xpos,ypos-1)*-1) + (cek(xpos-1,ypos)*-1) + (cek(xpos,ypos)*4) + (cek(xpos+1,ypos)*-1) + (cek(xpos,ypos+1)*-1)
+			}
+		}
+		obj.array2canvas(img)
+	})
+	
+	document.getElementById('sobel').addEventListener('click',function(){
+		if (!read || effect){
+			img = obj.image2read()
+			read = true
+		}
+		var Gxtemp = new Array(4)
+		var Gytemp = new Array(4)
+		var G = new Array()
+		var xpos = 0;
+		var ypos = 0;
+		function cek(x,y,n){
+			if(y>=0 && x>=0 && x<obj.width && y<obj.height) return parseInt(img[obj.xy2i(x,y)])
+			else return 0
+		}
+		for(var i=0; i<img.length; i++){
+			var Gtemp = new Array(4)
+			xpos = obj.i2x(i)
+			ypos = obj.i2y(i)
+			for(var j=0; j<3; j++){
+				Gxtemp[j] = (cek(xpos-1,ypos-1)*-1) + (cek(xpos-1,ypos)*-2) + (cek(xpos-1,ypos+1)*-1) + (cek(xpos+1,ypos-1)) + (cek(xpos+1,ypos)*2) + (cek(xpos+1,ypos+1))
+				Gytemp[j] = (cek(xpos-1,ypos-1)*-1) + (cek(xpos,ypos-1)*-2) + (cek(xpos+1,ypos-1)*-1) + (cek(xpos-1,ypos+1)) + (cek(xpos,ypos+1)*2) + (cek(xpos+1,ypos+1))
+				Gtemp[j] = Math.floor(Math.sqrt((parseInt(Gxtemp[j])*parseInt(Gxtemp[j])) + (parseInt(Gytemp[j])*parseInt(Gytemp[j]))))
+			}
+			Gtemp[3] = img[i][3]
+			G.push(Gtemp)
+		}
+		obj.array2canvas(G)
+	})
+	
+	document.getElementById('prewitt').addEventListener('click',function(){
+		if (!read || effect){
+			img = obj.image2read()
+			read = true
+		}
+		var Gxtemp = new Array(4)
+		var Gytemp = new Array(4)
+		var G = new Array()
+		var xpos = 0;
+		var ypos = 0;
+		function cek(x,y,n){
+			if(y>=0 && x>=0 && x<obj.width && y<obj.height) return parseInt(img[obj.xy2i(x,y)])
+			else return 0
+		}
+		for(var i=0; i<img.length; i++){
+			var Gtemp = new Array(4)
+			xpos = obj.i2x(i)
+			ypos = obj.i2y(i)
+			for(var j=0; j<3; j++){
+				Gxtemp[j] = (cek(xpos-1,ypos-1)*-1) + (cek(xpos-1,ypos)*-1) + (cek(xpos-1,ypos+1)*-1) + (cek(xpos+1,ypos-1)) + (cek(xpos+1,ypos)) + (cek(xpos+1,ypos+1))
+				Gytemp[j] = (cek(xpos-1,ypos-1)*-1) + (cek(xpos,ypos-1)*-1) + (cek(xpos+1,ypos-1)*-1) + (cek(xpos-1,ypos+1)) + (cek(xpos,ypos+1)) + (cek(xpos+1,ypos+1))
+				Gtemp[j] = Math.floor(Math.sqrt((parseInt(Gxtemp[j])*parseInt(Gxtemp[j])) + (parseInt(Gytemp[j])*parseInt(Gytemp[j]))))
+			}
+			Gtemp[3] = img[i][3]
+			G.push(Gtemp)
+		}
+		obj.array2canvas(G)
+	})
+	
+	document.getElementById('roberts').addEventListener('click',function(){
+		if (!read || effect){
+			img = obj.image2read()
+			read = true
+		}
+		var Gxtemp = new Array(4)
+		var Gytemp = new Array(4)
+		var G = new Array()
+		var xpos = 0;
+		var ypos = 0;
+		function cek(x,y,n){
+			if(y>=0 && x>=0 && x<obj.width && y<obj.height) return parseInt(img[obj.xy2i(x,y)])
+			else return 0
+		}
+		for(var i=0; i<img.length; i++){
+			var Gtemp = new Array(4)
+			xpos = obj.i2x(i)
+			ypos = obj.i2y(i)
+			for(var j=0; j<3; j++){
+				Gxtemp[j] = (cek(xpos,ypos)*-1) + (cek(xpos+1,ypos+1))
+				Gytemp[j] = (cek(xpos,ypos)) + (cek(xpos+1,ypos+1)*-1)
+				Gtemp[j] = Math.floor(Math.sqrt((parseInt(Gxtemp[j])*parseInt(Gxtemp[j])) + (parseInt(Gytemp[j])*parseInt(Gytemp[j]))))
+			}
+			Gtemp[3] = img[i][3]
+			G.push(Gtemp)
+		}
+		obj.array2canvas(G)
+	})
+</script>
